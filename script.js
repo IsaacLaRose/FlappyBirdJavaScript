@@ -17,7 +17,10 @@ let score = 0;
 let scoredPipes = new Set();
 
 
-let gameState = "waiting"; // "waiting", "playing"
+
+let gameState = "waiting"; // "waiting", "playing", "gameover"
+let gameStateElement = document.getElementById("gameState");
+
 
 let pipes = [
     { col: 40, gapStart: 10, gapSize: 8 }
@@ -58,18 +61,63 @@ draw();
 
 
 document.addEventListener('keydown', (e) => { //Jumping/flapping when pressing space
-  if (e.code === 'Space') {
-    birdVel = -2;
-    gameState = "playing";
-  }
+    if (e.code === 'Space') {
+
+        if (gameState === "waiting") {
+            resetGame();
+            gameState = "playing";
+        }
+
+        if (gameState === "gameover") {
+            resetGame();
+            gameState = "playing";
+        }
+
+        if (gameState === "playing") {
+            gameStateElement.textContent = "Game is Running!";
+            birdVel = -2;
+        }
+    }
 });
 
-setInterval(() => { //game loop
-    
+
+function resetGame() {
+    birdRow = 10;
+    birdVel = 0;
+    pipes = [{ col: 40, gapStart: 10, gapSize: 8 }];
+    score = 0;
+    scoredPipes.clear();
+
+    gameState = "waiting";
+    gameStateElement.textContent = "Press Space to start!";
+}
+
+
+setInterval(() => {
+
     if (gameState === "waiting") {
+        gameStateElement.textContent = "Press Space to start!";
+        draw();
         return;
     }
-    birdVel += 0.5; //gravity
+
+    if (gameState === "gameover") {
+        gameStateElement.textContent = "Game Over! Press Space to start!";
+
+        birdVel += 0.5;
+        birdRow += birdVel;
+
+        if (birdRow >= gridHeight - 1) {
+            birdRow = gridHeight - 1;
+            birdVel = 0;
+        }
+
+        draw();
+        return;
+    }
+
+
+    birdVel += 0.5;
     birdRow += birdVel;
 
     nextPipe = (nextPipe + 1) % 20;
@@ -86,40 +134,25 @@ setInterval(() => { //game loop
     for (let pipe of pipes) {
         pipe.col -= 1;
 
-        // ONLY check collision when bird is in same column
         if (pipe.col === birdCol) {
             let inGap =
                 birdRow >= pipe.gapStart &&
                 birdRow < pipe.gapStart + pipe.gapSize;
 
-            if (!inGap) {
-                crashed = true;
-            }
+            if (!inGap) crashed = true;
+
             score++;
         }
     }
 
-    // global game over check
     if (birdRow <= 0 || birdRow >= gridHeight || crashed) {
-        alert("Game Over!");
-        birdRow = 10;
-        birdVel = 0;
-        pipes = [{ col: 40, gapStart: 10, gapSize: 8 }];
-        score = 0;
-        scoredPipes = new Set();
-        gameState = "waiting";
-        return;
+        gameState = "gameover"; // ❗ NO reset here
     }
-        // if (pipe.col < 0) {
-        //     pipe.col = 50;
-        //     pipe.gapSize = Math.random() * (Gapmaximum - Gapminimum) + Gapminimum;
-        //     pipe.gapStart = Math.floor(Math.random() * (gridHeight - pipe.gapSize - 4)) + 2;
-        // }
 
     scoreElement.textContent = "Score = " + score;
     draw();
-    
-}, 100)
+
+}, 100);
 
 
 
