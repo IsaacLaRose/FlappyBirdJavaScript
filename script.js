@@ -81,7 +81,7 @@ document.addEventListener('keydown', (e) => { //Jumping/flapping when pressing s
 });
 
 
-function resetGame() {
+function resetGame() { //Reset Game Function
     birdRow = 10;
     birdVel = 0;
     pipes = [{ col: 40, gapStart: 10, gapSize: 8 }];
@@ -93,7 +93,7 @@ function resetGame() {
 }
 
 
-setInterval(() => {
+setInterval(() => {// Gamr Loop
 
     if (gameState === "waiting") {
         gameStateElement.textContent = "Press Space to start!";
@@ -101,7 +101,7 @@ setInterval(() => {
         return;
     }
 
-    if (gameState === "gameover") {
+    if (gameState === "gameover") { //Bird falls
         gameStateElement.textContent = "Game Over! Press Space to start!";
 
         birdVel += 0.5;
@@ -146,7 +146,7 @@ setInterval(() => {
     }
 
     if (birdRow <= 0 || birdRow >= gridHeight || crashed) {
-        gameState = "gameover"; // ❗ NO reset here
+        gameState = "gameover"; // GAME OVER
     }
 
     scoreElement.textContent = "Score = " + score;
